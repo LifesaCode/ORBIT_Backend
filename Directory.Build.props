@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
+    <Nullable Condition="'$(Configuration)' == 'Debug'">enable</Nullable>
+    <Nullable Condition="'$(Configuration)' == 'Release'">annotations</Nullable>
+    <CodeAnalysisRuleSet>$(SolutionDir)\Analyzers.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+</Project>
