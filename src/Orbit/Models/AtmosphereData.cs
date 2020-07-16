@@ -267,7 +267,7 @@ namespace Orbit.Models
             if(CabinStatus == Modes.Uncrewed)
             {
                 Temperature = rand.Next(5, 100) / 10.0;
-                AmbientNoiseLevel = rand.Next(0, 40);
+                AmbientNoiseLevel = rand.Next(10, 40);
                 HumidityLevel = rand.Next(20, 40);
                 Pressure = rand.Next(30, 80);
                 SeperatorSpeed = 0;
@@ -290,7 +290,19 @@ namespace Orbit.Models
                 LiquidInOutflow = false;
             }
         }
-
+		
+		public void ChangeCrewedStatus()
+		{
+			if(CabinStatus == Modes.Crewed)
+			{
+				CabinStatus = Modes.Uncrewed;
+			}
+			else
+			{
+				CabinStatus = Modes.Uncrewed;
+			}
+		}
+		
         #endregion Methods
 
         #region Check Alerts

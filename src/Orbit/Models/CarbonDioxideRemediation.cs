@@ -28,8 +28,12 @@ namespace Orbit.Models
         public const double CarbonDioxideOutputLimit = .5;  
         public const double CarbonDioxideOutputTolerance = 2;
         public const double CarbonDioxideStandbyValue = .5;
-                
-        // temporary pseudo-timer 
+        
+		Modes crewed = Modes.Crewed;
+		int maxCO2 = 30;
+		int maxCrewedCO2 = 30;
+		int maxUncrewedCO2 = 80;
+        // temporary pseudo-timer to trigger switching which bed is absorbing
         public int count = 0;
         private int countLength = 10;
 
@@ -159,6 +163,17 @@ namespace Orbit.Models
             }
             else { }
         }
+		
+		public void ChangeCrewedStatus(){
+			if(crewed == Modes.Crewed){
+				crewed = Modes.Uncrewed;
+				maxCO2 = maxUncrewedCO2;
+			}else{
+				crewed = Modes.Crewed;
+				maxCO2 = maxCrewedCO2;
+			}
+		}
+			
 
         #endregion Public Methods
 
@@ -168,10 +183,11 @@ namespace Orbit.Models
         {
             Random rand = new Random();
 
-            Co2Level = rand.Next(0, 80) / 10.0;
+            Co2Level = rand.Next(0, maxCO2) / 10.0;
 
             if(Status == SystemStatus.Processing)
             {
+				FanOn = true;
                 if (RegeneratingBed == BedOptions.Bed1)
                 {
                     Bed1Temperature = rand.Next(175, 232);
@@ -185,6 +201,7 @@ namespace Orbit.Models
             }
             else
             {
+				FanOn = false;
                 Bed1Temperature = rand.Next(19, 32);
                 Bed2Temperature = rand.Next(19, 32);
             }

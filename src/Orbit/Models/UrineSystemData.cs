@@ -312,6 +312,14 @@ namespace Orbit.Models
             else { return true; }
         }
 
+        public void ChangeCrewedStatus()
+        {
+            if(UrineTankLevel > 0)
+            {
+                Status = SystemStatus.Processing;
+            }
+        }
+
         #endregion Methods
 
         #region Alert Generation

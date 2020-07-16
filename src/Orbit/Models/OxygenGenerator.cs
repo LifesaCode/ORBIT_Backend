@@ -21,6 +21,9 @@ namespace Orbit.Models
         int totalNumOfCells = 10;
 
         public SystemStatus lastWorkingStatus;
+		Modes crewedStatus = Modes.Crewed;
+		int crewedLevel = 21;
+		int uncrewedLevel = 15;
 
         #endregion Limits
 
@@ -134,7 +137,7 @@ namespace Orbit.Models
             RecirculationPumpOn = false;
             NumActiveCells = 0;
             SystemOutput = 0;
-            OxygenSetLevel = 20;
+            OxygenSetLevel = crewedLevel;
             OxygenLevel = 15;
             lastWorkingStatus = SystemStatus.Standby;
         }
@@ -301,6 +304,19 @@ namespace Orbit.Models
         {
             return NumActiveCells * cellOutputLiters;
         }
+		
+		public void ChangeCrewedStatus()
+		{
+			if(crewedStatus == Modes.Crewed){
+				crewedStatus = Modes.Uncrewed;
+				OxygenSetLevel = uncrewedLevel;
+			}
+			else{
+				crewedStatus = Modes.Crewed;
+				OxygenSetLevel = crewedLevel;
+			}
+		}
+		
 
         #endregion Private Methods
 

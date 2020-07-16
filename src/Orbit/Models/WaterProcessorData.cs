@@ -22,6 +22,8 @@ namespace Orbit.Models
         const int largeIncrement = 5;
         const int highLevel = productTankLevelUpperLimit - productTankLevelTolerance;
 
+        double wasteWaterLevel;
+
         #endregion Limits
 
         #region Public Properties
@@ -103,14 +105,15 @@ namespace Orbit.Models
 
         public void ProcessData(double wasteTankLevel)
         {
+            wasteWaterLevel = wasteTankLevel;
             GenerateData();
 
             if (SystemStatus == SystemStatus.Standby)
             {
                 // waste tank is full and there is room in the clean tank;
                 // or clean tank is empty and waste tank is not, start processing
-                if ( ((wasteTankLevel >= highLevel) && (ProductTankLevel < productTankLevelUpperLimit))
-                    || (ProductTankLevel < productTankLevelTolerance) && (wasteTankLevel > 0) )
+                if ( ((wasteWaterLevel >= highLevel) && (ProductTankLevel < productTankLevelUpperLimit))
+                    || (ProductTankLevel < productTankLevelTolerance) && (wasteWaterLevel > 0) )
                 {
                     SystemStatus = SystemStatus.Processing;
                     // turn processor 'on'
@@ -138,7 +141,7 @@ namespace Orbit.Models
                 }
 
                 // waste tank empty, nothing left to process or product tank full; change to standby
-                if (wasteTankLevel <= 0)
+                if (wasteWaterLevel <= 0)
                 {
                     SystemStatus = SystemStatus.Standby;
                     // turn processor 'off'
@@ -188,6 +191,13 @@ namespace Orbit.Models
             PumpOn = false;
         }
 
+        public void ChangeCrewedStatus()
+        {
+            if(wasteWaterLevel > 5)
+            {
+                SystemStatus = SystemStatus.Processing;
+            }
+        }
         #endregion Logic Methods
 
         #region ValueCheckMethods
