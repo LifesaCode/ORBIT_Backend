@@ -50,7 +50,12 @@ namespace Orbit.Models
         /// current operating state of the system
         /// </summary>
         public SystemStatus Status { get; set; }
-        
+
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// Circulation fan to move air over carbon dioxide absorbing zeolite beds
         /// </summary>
@@ -125,6 +130,7 @@ namespace Orbit.Models
         public void SeedData()
         {
             Status = SystemStatus.Standby;
+            IsManualMode = false;
             FanOn = false;
             BedSelectorValve = BedOptions.Bed1;
             AbsorbingBed = BedOptions.Bed1;
@@ -138,6 +144,9 @@ namespace Orbit.Models
         public void ProcessData( )
         {
             GenerateData();
+
+            if (IsManualMode)
+                return;
 
             if (Status == SystemStatus.Processing)
             {

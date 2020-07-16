@@ -43,6 +43,11 @@ namespace Orbit.Models
 
         public SystemStatus Status { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// seperates water from methane gas, false when SeperatorMotorSpeed = 0
         /// </summary>
@@ -138,6 +143,7 @@ namespace Orbit.Models
         {
             ReportDateTime = DateTimeOffset.Now;
             Status = SystemStatus.Standby;
+            IsManualMode = false;
             SeperatorOn = false;
             SeperatorMotorSpeed = 0;
             SeperatorMotorSetSpeed = 2000;
@@ -153,6 +159,10 @@ namespace Orbit.Models
         public void ProcessData()
         {
             GenerateData();
+
+            // will bypass automatic state changes
+            if (IsManualMode)
+                return;
 
             if(Status == SystemStatus.Processing)
             {

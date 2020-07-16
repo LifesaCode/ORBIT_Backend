@@ -42,6 +42,11 @@ namespace Orbit.Models
         /// </summary>
         public Modes Mode { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// true if pump is working, false if not working
         /// </summary>
@@ -164,6 +169,9 @@ namespace Orbit.Models
         public void ProcessData()
         {
             GenerateData();
+
+            if (IsManualMode)
+                return;
 
             // both pumps on, dual loop operation
             if (LowTempPumpOn && MedTempPumpOn)

@@ -35,6 +35,11 @@ namespace Orbit.Models
         /// </summary>
         public SystemStatus SystemStatus { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// draws water from dirty storage tank and pushes into the water processing system
         /// </summary>
@@ -107,6 +112,10 @@ namespace Orbit.Models
         {
             wasteWaterLevel = wasteTankLevel;
             GenerateData();
+
+            // will bypass automatic state changes
+            if (IsManualMode)
+                return;
 
             if (SystemStatus == SystemStatus.Standby)
             {
@@ -183,6 +192,7 @@ namespace Orbit.Models
         public void SeedData()
         {
             SystemStatus = SystemStatus.Standby;
+            IsManualMode = false;
             FiltersOk = true;
             PostHeaterTemp = 20;
             ProductTankLevel = 80;

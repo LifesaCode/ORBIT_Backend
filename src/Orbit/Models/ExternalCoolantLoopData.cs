@@ -44,6 +44,11 @@ namespace Orbit.Models
         /// </summary>
         public SystemStatus Status { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// position in degrees from neutral point.
         /// </summary>
@@ -144,6 +149,7 @@ namespace Orbit.Models
         public void SeedData()
         {
             Status = SystemStatus.On;
+            IsManualMode = false;
             RadiatorRotation = 0;
             PumpAOn = true;
             PumpBOn = true;
@@ -159,6 +165,9 @@ namespace Orbit.Models
         public void ProcessData()
         {
             GenerateData();
+
+            if (IsManualMode)
+                return;
 
             trouble = false;
 

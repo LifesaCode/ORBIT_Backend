@@ -47,6 +47,11 @@ namespace Orbit.Models
         /// </summary>
         public SystemStatus Status { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// Fullness of treated urine holding tank as a percentage
         /// </summary>
@@ -111,8 +116,6 @@ namespace Orbit.Models
             DistillerSpeed = other.DistillerSpeed;
             PurgePumpOn = other.PurgePumpOn;
             BrineTankLevel = other.BrineTankLevel;
-
-            //GenerateData();
         }
 
         #endregion Constructors
@@ -123,6 +126,9 @@ namespace Orbit.Models
         {
             bool trouble = false;
             GenerateData();
+
+            if (IsManualMode)
+                return;
 
             if (Status == SystemStatus.Standby)
             {
@@ -268,6 +274,7 @@ namespace Orbit.Models
 
         void ISeedableModel.SeedData()
         {
+            IsManualMode = false;
             BrineTankLevel = 5;
             DistillerSpeed = 20;
             DistillerTemp = 20;
@@ -280,6 +287,7 @@ namespace Orbit.Models
 		
 		public void SeedData()
         {
+            IsManualMode = false;
             BrineTankLevel = 5;
             DistillerSpeed = 20;
             DistillerTemp = 20;

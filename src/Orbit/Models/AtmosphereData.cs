@@ -57,6 +57,11 @@ namespace Orbit.Models
         /// </summary>
         public Modes CabinStatus { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// Decibel value of cabin noise
         /// </summary>
@@ -179,6 +184,7 @@ namespace Orbit.Models
         {
             ReportDateTime = DateTimeOffset.Now;
             CabinStatus = Modes.Crewed;
+            IsManualMode = false;
             HumidityLevel = 40;
             HumiditySetLevel = 40;
 			AmbientNoiseLevel = 30;
@@ -198,7 +204,10 @@ namespace Orbit.Models
         public void ProcessData()
         {
 			GenerateData();
-			
+
+            if (IsManualMode)
+                return;
+                			
             // too hot or humid
             if (Temperature > (SetTemperatureDay + tempControlIncrement)
                 || HumidityLevel > (HumiditySetLevel + cabinHumidityLevelTolerance)) 

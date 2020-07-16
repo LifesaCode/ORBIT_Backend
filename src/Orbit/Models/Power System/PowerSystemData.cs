@@ -56,6 +56,11 @@ namespace Orbit.Models
         /// </summary>
         public SystemStatus Status { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// determines whether the batteries are charging or discharging
         /// </summary>
@@ -139,6 +144,7 @@ namespace Orbit.Models
         {
             Status = SystemStatus.On;
             ShuntStatus = PowerShuntState.Charge;
+            IsManualMode = false;
             SolarArrayRotation = 0;
             SolarRotationIncreasing = true;
             SolarArrayVoltage = 172;
@@ -152,6 +158,11 @@ namespace Orbit.Models
         public void ProcessData()
         {
             GenerateData();
+
+            if (IsManualMode)
+            {
+
+            }
 
             if ((BatteryTemperature >= batteryTemperatureUpperLimit)
                 || (BatteryTemperature <= batteryTemperatureLowerLimit))
@@ -169,8 +180,10 @@ namespace Orbit.Models
                 ShuntStatus = PowerShuntState.Charge;
                 SimulateCharge();
             }
-
-            RotatePanels();
+            if (IsManualMode)
+                return;
+            else
+                RotatePanels();
         }
 
         #endregion Public Methods
@@ -197,8 +210,9 @@ namespace Orbit.Models
             {
                 SolarArrayVoltage = 0;
             }
-            // simulate station behind Earth or Moon, so no sunlight on solar panels
-            else if(inEclipse)
+            // simulate station behind Earth or Moon, so no sunlight on solar panels; 
+            // or is in manual mode, assumes panels not adjusted to face sun
+            else if(inEclipse || IsManualMode)
             {
                 SolarArrayVoltage = rand.Next(0, solarVoltageTolerance);
             }

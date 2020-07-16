@@ -44,6 +44,11 @@ namespace Orbit.Models
         /// </summary>
         public Modes Mode { get; set; }
 
+        ///<summary>
+        /// denotes whether the system is operating in automatic or manual capacity
+        /// </summary>
+        public bool IsManualMode { get; set; }
+
         /// <summary>
         /// sensor that checks for bubbles in inflow water, water is sent back to water processor if bubbles are present
         /// </summary>
@@ -130,6 +135,7 @@ namespace Orbit.Models
         {
             Status = SystemStatus.Standby;
             Mode = Modes.Crewed;
+            IsManualMode = false;
             InflowBubblesPresent = false;
             DiverterValvePosition = DiverterValvePositions.Accept;
             HydrogenSensor = false;
@@ -145,6 +151,9 @@ namespace Orbit.Models
         public void ProcessData()
         {
 			GenerateData();
+
+            if (IsManualMode)
+                return;
 			
             if (Status == SystemStatus.Processing)
             {
