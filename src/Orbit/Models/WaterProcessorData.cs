@@ -210,7 +210,7 @@ namespace Orbit.Models
         }
         #endregion Logic Methods
 
-        #region ValueCheckMethods
+        #region Check Alerts
 
         private IEnumerable<Alert> CheckProductTankLevel()
         {
@@ -305,7 +305,16 @@ namespace Orbit.Models
                 .Concat(this.CheckSystemStatus());
         }
 
-        #endregion ValueCheckMethods
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckProductTankLevel()
+                .Concat(this.CheckFiltersOk())
+                .Concat(this.CheckPostHeaterTemp())
+                .Concat(this.CheckPostReactorQuality())
+                .Concat(this.CheckSystemStatus());
+        }
+
+        #endregion Check Alerts
 
         #region Implementation of IModuleComponent
 

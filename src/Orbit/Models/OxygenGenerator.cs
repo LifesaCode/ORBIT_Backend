@@ -422,6 +422,14 @@ namespace Orbit.Models
                 .Concat(this.CheckMaxProduction());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return CheckHydrogenSensor()
+                .Concat(this.CheckSeperator())
+                .Concat(this.CheckPump())
+                .Concat(this.CheckMaxProduction());
+        }
+
         #endregion  Check Alerts
 
         #region Equality Members

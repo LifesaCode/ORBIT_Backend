@@ -424,6 +424,14 @@ namespace Orbit.Models
                 .Concat(this.CheckBrineTankLevel());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckUrineTankLevel()
+                .Concat(this.CheckDistillerTemp())
+                .Concat(this.CheckDistillerSpeed())
+                .Concat(this.CheckBrineTankLevel());
+        }
+
         #endregion Alert Generation
 
         #region Equality members

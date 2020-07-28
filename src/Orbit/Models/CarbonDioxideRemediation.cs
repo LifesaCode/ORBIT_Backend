@@ -390,6 +390,14 @@ namespace Orbit.Models
                 .Concat(CheckBedsAlternate());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckRegenerationTemp()
+                .Concat(CheckFan())
+                .Concat(CheckOutputCo2Level())
+                .Concat(CheckBedsAlternate());
+        }
+
         #endregion Check Alerts
 
         #region Equality Members

@@ -99,6 +99,30 @@ namespace Orbit.Models
             }
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            if (this.Level >= full)
+            {
+                yield return this.CreateAlert(a => a.Level, "Tank overflowing", AlertLevel.HighError);
+            }
+            else if (this.Level >= (full - tolerance))
+            {
+                yield return this.CreateAlert(a => a.Level, "Water level high", AlertLevel.HighWarning);
+            }
+            else if (this.Level <= empty)
+            {
+                yield return this.CreateAlert(a => a.Level, "Water level very low", AlertLevel.HighError);
+            }
+            else if (this.Level < (empty + tolerance))
+            {
+                yield return this.CreateAlert(a => a.Level, "Water level low", AlertLevel.LowWarning);
+            }
+            else
+            {
+                yield return this.CreateAlert(a => a.Level);
+            }
+        }
+
         #region Equality members
 
         public override bool Equals(object obj)

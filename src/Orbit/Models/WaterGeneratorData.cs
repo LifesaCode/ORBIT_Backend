@@ -551,6 +551,18 @@ namespace Orbit.Models
                 .Concat(CheckH2StoreLevel());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckSeperatorOn()
+                .Concat(CheckSeperatorSpeed())
+                .Concat(CheckHeaterOn())
+                .Concat(CheckReactorTemp())
+                .Concat(CheckPumpOn())
+                .Concat(CheckMethaneStoreLevel())
+                .Concat(CheckCo2StoreLevel())
+                .Concat(CheckH2StoreLevel());
+        }
+
 
         #endregion Check Alerts
 

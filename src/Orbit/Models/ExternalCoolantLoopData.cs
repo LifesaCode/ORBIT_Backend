@@ -28,8 +28,6 @@ namespace Orbit.Models
         public int mixValveTolerance = 5;
 
         public bool radiatorRotationIncreasing = true;
-        public bool trouble = false;
-        public SystemStatus lastWorkingStatus;
 
         #endregion Limits
 
@@ -169,24 +167,10 @@ namespace Orbit.Models
             if (IsManualMode)
                 return;
 
-            trouble = false;
-
+            // take actions if system is 'On' or 'Processing', do nothing otherwise (crew selected off)
             if((Status == SystemStatus.On) || (Status == SystemStatus.Processing))
             {
-                // pump failure (loss of pump motor rotation, regardless of line pressure) 
-                if (!PumpAOn || !PumpBOn)
-                {
-                    Trouble();
-                }
-                // system cannot work if radiator is retracted
-                if (!RadiatorDeployed)
-                {
-                    Trouble();
-                    PumpAOn = false;                      
-                    PumpBOn = false;
-                }
-
-                if (OutputFluidTemperature > (SetTemperature + 3))
+                if (OutputFluidTemperature > SetTemperature)
                 {
                     // open the mixing valve and allow more 'cold' fluid in the mix
                     IncreaseFluidMix();
@@ -197,26 +181,8 @@ namespace Orbit.Models
                     DecreaseFluidMix();
                 }
 
-                LinePressures();
-
                 // simulate radiator rotation
                 RotateRadiator();
-            }
-            else if((Status == SystemStatus.Ready) || (Status == SystemStatus.Standby))
-            {
-                if(PumpAOn || PumpBOn)
-                {
-                    Trouble();
-                }
-            }
-
-            if (trouble)
-            {
-                Status = SystemStatus.Trouble;
-            }
-            else
-            {
-                Status = SystemStatus.On;
             }
         }
 
@@ -226,23 +192,28 @@ namespace Orbit.Models
 
             LineAPressure = rand.Next(345, 3309);
             LineBPressure = rand.Next(345, 3309);
-            OutputFluidTemperature = rand.Next(0, 81) / 10.0;
 
-            if (rand.Next(0, 10) == 5)
+            // Simulate temp decrease when pump not on (not exchanging heat with station)
+            if(Status == SystemStatus.Standby)
             {
-                PumpAOn = false;
+                if(OutputFluidTemperature > 120.0)
+                {
+                    OutputFluidTemperature -= 1.75;
+                }
             }
             else
             {
-                PumpAOn = true;
+                OutputFluidTemperature = rand.Next(0, 81) / 10.0;
+            }
+
+            // simulate a perodic pump failure
+            if (rand.Next(0, 10) == 5)
+            {
+                PumpAOn = !PumpAOn;
             }
             if (rand.Next(0, 10) == 9)
             {
-                PumpBOn = false;
-            }
-            else
-            {
-                PumpBOn = true;
+                PumpBOn = !PumpBOn;
             }
         }
 
@@ -265,7 +236,6 @@ namespace Orbit.Models
                 else
                 {
                     MixValvePosition = mixValveUpperLimit;
-                    Trouble();
                 }
             }
         }
@@ -277,11 +247,6 @@ namespace Orbit.Models
 
             if (MixValvePosition == mixValveLowerLimit)
             {
-                if (LineHeaterOn &&( OutputFluidTemperature < outputFluidTemperatureLowerLimit))
-                {
-                    // heater is not enough
-                    Trouble();
-                }
                 // heat load from station is too low to keep fluid above min temp, turn heater on
                 LineHeaterOn = true;
             }
@@ -291,45 +256,10 @@ namespace Orbit.Models
             }
         }
 
-        private void LinePressures()
-        {
-            // pressure out of range signaling a problem, but not critical
-            if ((LineAPressure > fluidPressureUpperLimit) || (LineAPressure < fluidPressureLowerLimit))
-            {
-                // critical problem in fluid line A (while pump on and working), shut off pumpA to prevent pump damage 
-                PumpAOn = false;
-                Trouble();
-            }
-            else if ((LineBPressure > fluidPressureUpperLimit) || (LineBPressure < fluidPressureLowerLimit))
-            {
-                // critical problem in fluid line B (while pump on and working), shut off pumpB to prevent pump damage
-                PumpBOn = false;
-                Trouble();
-            }
-            else if ((LineAPressure > fluidPressureUpperLimit - fluidPressureTolerance)
-                || (LineBPressure > fluidPressureUpperLimit - fluidPressureTolerance)
-                || (LineAPressure < fluidPressureLowerLimit + fluidPressureTolerance)
-                || (LineBPressure < fluidPressureLowerLimit + fluidPressureTolerance))
-            {
-                Trouble();
-            }
-            else
-            {   // pressures in range
-                PumpAOn = true;
-                PumpBOn = true;
-            }
-        }
-
         private void RotateRadiator()
         {
             if (RadiatorDeployed)
             {
-                // radiators have exceeded normal operating range
-                if((RadiatorRotation > radiatorRotationUpperLimit) ||( RadiatorRotation < radiatorRotationLowerLimit))
-                {
-                    Trouble();
-                }
-
                 // rotate radiator back and forth between range bounds
                 if (radiatorRotationIncreasing && RadiatorRotation < (radiatorRotationUpperLimit - radiatorRotationTolerance))
                 {
@@ -352,16 +282,25 @@ namespace Orbit.Models
             }
         }
 
-        /// <summary>
-        /// Toggles a flag to change the staus to 'trouble' if there is some kind of trouble with the system
-        /// </summary>
-        private void Trouble()
+        public void ToggleOnOff()
         {
-            if (!trouble)
+            if(Status == SystemStatus.Standby)
             {
-                lastWorkingStatus = Status;
-                trouble = true;
+                Status = SystemStatus.On;
+                PumpAOn = true;
+                PumpBOn = true;
             }
+            else
+            {
+                Status = SystemStatus.Standby;
+                PumpAOn = false;
+                PumpBOn = false;
+            }
+        }
+
+        public void ToggleRadiatorDeployed()
+        {
+            RadiatorDeployed = !RadiatorDeployed;
         }
 
         #endregion Methods
@@ -525,6 +464,18 @@ namespace Orbit.Models
         }
 
         IEnumerable<Alert> IAlertableModel.GenerateAlerts()
+        {
+            return this.CheckPumpA()
+                .Concat(CheckPumpB())
+                .Concat(CheckMixValvePosition())
+                .Concat(CheckRadiatorDeployed())
+                .Concat(CheckRadiatorRotation())
+                .Concat(CheckLineAPressure())
+                .Concat(CheckLineBPressure())
+                .Concat(CheckOutputFluidTemp());
+        }
+
+        public IEnumerable<Alert> GetAlerts()
         {
             return this.CheckPumpA()
                 .Concat(CheckPumpB())

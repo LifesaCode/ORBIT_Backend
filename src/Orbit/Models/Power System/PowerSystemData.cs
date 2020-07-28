@@ -419,6 +419,15 @@ namespace Orbit.Models
                 .Concat(CheckSolarVoltage());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckBatteryChargeLevel()
+                .Concat(CheckBatteryTemp())
+                .Concat(CheckBatteryVoltage())
+                .Concat(CheckSolarRotation())
+                .Concat(CheckSolarVoltage());
+        }
+
         #endregion CheckAlerts
 
         #region Equality Members

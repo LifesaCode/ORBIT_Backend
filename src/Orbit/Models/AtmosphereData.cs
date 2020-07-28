@@ -470,6 +470,17 @@ namespace Orbit.Models
                 .Concat(CheckLiquidInOutflow());
         }
 
+        public IEnumerable<Alert> GetAlerts()
+        {
+            return this.CheckPressure()
+                .Concat(CheckHumidityLevel())
+                .Concat(CheckCabinAmbientNoiseLevel())
+                .Concat(CheckCabinTemperature())
+                .Concat(CheckFanSpeed())
+                .Concat(CheckSeperator())
+                .Concat(CheckLiquidInOutflow());
+        }
+
         #endregion Check Alerts
 
         #region Equality Members

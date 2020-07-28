@@ -170,7 +170,7 @@ namespace Orbit.Models
         {
             GenerateData();
 
-            if (IsManualMode)
+            if (Status == SystemStatus.Standby || IsManualMode)
                 return;
 
             // both pumps on, dual loop operation
@@ -182,7 +182,7 @@ namespace Orbit.Models
                 {
                     DecreaseMix("low");
                 }
-                if (TempLowLoop > (SetTempLowLoop + 7))
+                if (TempLowLoop > (SetTempLowLoop))
                 {
                     IncreaseMix("low");
                 }
@@ -250,15 +250,32 @@ namespace Orbit.Models
 
         private void Trouble()
         {
-            Status = SystemStatus.Trouble;
+            // TODO: need way auto recover from Trouble state
+            // TODO: define functionality while in Trouble State
+            //Status = SystemStatus.Trouble;
         }
 
         private void GenerateData()
         {
             Random rand = new Random();
 
-            TempLowLoop = rand.Next(0, 150) / 10.0;
-            TempMedLoop = rand.Next(0, 350) / 10.0;
+            if(Status == SystemStatus.Standby)
+            {
+                // with coolant system off, temp of station will rise due to heat from equipment
+                if(TempLowLoop < 60)
+                {
+                    TempLowLoop += 0.5;
+                }
+                if (TempMedLoop < 60)
+                {
+                    TempMedLoop += 0.5;
+                }
+            }
+            else
+            {
+                TempLowLoop = rand.Next(0, 150) / 10.0;
+                TempMedLoop = rand.Next(0, 350) / 10.0;
+            }
 
             if (rand.Next(0, 10) == 5)
             {
@@ -277,7 +294,6 @@ namespace Orbit.Models
             {
                 MedTempPumpOn = true;
             }
-            
         }
 
         private void IncreaseMix(string loop)
@@ -355,6 +371,30 @@ namespace Orbit.Models
             else
             {
                 CrossoverMixValvePosition = mixValveMaxClosed;
+            }
+        }
+
+        public void ToggleOnOff()
+        {
+            if (Status == SystemStatus.Standby)
+            {
+                // system is off, turn it on
+                Status = SystemStatus.On;
+
+                // give valves a lower 'start' position to prevent possible freezing 
+                LowTempMixValvePosition = 10;
+                MedTempMixValvePosition = 10;
+
+                MedTempPumpOn = true;
+                LowTempPumpOn = true;
+
+            }
+            // system is on, turn it off
+            else
+            {
+                Status = SystemStatus.Standby;
+                MedTempPumpOn = false;
+                LowTempPumpOn = false;
             }
         }
 
@@ -509,6 +549,17 @@ namespace Orbit.Models
 
 
         IEnumerable<Alert> IAlertableModel.GenerateAlerts()
+        {
+            return this.CheckLowLoopTemp()
+                .Concat(CheckMedLoopTemp())
+                .Concat(CheckLowTempMixValve())
+                .Concat(CheckMedTempMixValve())
+                .Concat(CheckCrossoverMixValve())
+                .Concat(CheckLowTempPump())
+                .Concat(CheckMedTempPump());
+        }                            
+
+        public IEnumerable<Alert> GetAlerts()
         {
             return this.CheckLowLoopTemp()
                 .Concat(CheckMedLoopTemp())
