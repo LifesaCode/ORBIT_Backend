@@ -159,16 +159,10 @@ namespace Orbit.Models
             {
                 SimulateProcessing();
             }
-            else if (Status == SystemStatus.Standby)
+            else (Status == SystemStatus.Standby)
             {
                 SimulateStandby();
             }
-            else if (Status == SystemStatus.Trouble)
-            {
-                Trouble();
-            }
-            else
-            { }
 
             SystemOutput = SimulateOutput();
         }
@@ -179,16 +173,6 @@ namespace Orbit.Models
 
         private void SimulateProcessing()
         {
-            // system cannot work if any of these components fail (simulated by an 'off' state)
-            if (HydrogenSensor || !SeparatorOn || !RecirculationPumpOn)
-            {
-                Status = SystemStatus.Trouble;
-            }
-            else
-            {
-                Status = SystemStatus.Processing;
-            }
-
             if (OxygenLevel < OxygenSetLevel)
             {
                 IncreaseActiveCells();
@@ -211,30 +195,24 @@ namespace Orbit.Models
                 SeparatorOn = true;
                 RecirculationPumpOn = true;
             }
-
-            // all components should be off while in 'Standby', else there is a system fault
-            if (SeparatorOn || RecirculationPumpOn)
-            {
-                Status = SystemStatus.Trouble;
-            }
 			else
 			{
 				Status = SystemStatus.Processing;
 			}
         }
 
-        private void Trouble()
-        {
-            Status = SystemStatus.Trouble;
-            if (lastWorkingStatus == SystemStatus.Processing)
-            {
-                SimulateProcessing();
-            }
-            else
-            {
-                SimulateStandby();
-            }
-        }
+        // private void Trouble()
+        // {
+            // Status = SystemStatus.Trouble;
+            // if (lastWorkingStatus == SystemStatus.Processing)
+            // {
+                // SimulateProcessing();
+            // }
+            // else
+            // {
+                // SimulateStandby();
+            // }
+        // }
 
         public void GenerateData()
         {
@@ -335,7 +313,6 @@ namespace Orbit.Models
         {
             if (HydrogenSensor)
             {
-                Trouble();
                 yield return this.CreateAlert(a => a.HydrogenSensor, "Hydrogen detected in outflow", AlertLevel.HighError);
             }
             else
@@ -350,7 +327,6 @@ namespace Orbit.Models
             {
                 if (!SeparatorOn)
                 {
-                    Trouble();
                     yield return this.CreateAlert(a => a.SeparatorOn, "Seperator off while in processing status", AlertLevel.HighError);
                 }
             }
@@ -358,7 +334,6 @@ namespace Orbit.Models
             {
                 if (SeparatorOn)
                 {
-                    Trouble();
                     yield return this.CreateAlert(a => a.SeparatorOn, "Seperator on while in Standby status", AlertLevel.HighError);
                 }
             }
@@ -374,7 +349,6 @@ namespace Orbit.Models
             {
                 if (!RecirculationPumpOn)
                 {
-                    Trouble();
                     yield return this.CreateAlert(a => a.RecirculationPumpOn, "Pump is off while in Processing status", AlertLevel.HighError);
                 }
             }
@@ -382,7 +356,6 @@ namespace Orbit.Models
             {
                 if (RecirculationPumpOn)
                 {
-                    Trouble();
                     yield return this.CreateAlert(a => a.RecirculationPumpOn, "Pump in on while in Standby status", AlertLevel.HighError);
                 }
             }

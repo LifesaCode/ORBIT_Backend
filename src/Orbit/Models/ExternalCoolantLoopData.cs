@@ -190,13 +190,13 @@ namespace Orbit.Models
         {
             Random rand = new Random();
 
-            LineAPressure = rand.Next(345, 3309);
-            LineBPressure = rand.Next(345, 3309);
+            LineAPressure = rand.Next(1500, 3000);
+            LineBPressure = rand.Next(1500, 3000);
 
             // Simulate temp decrease when pump not on (not exchanging heat with station)
             if(Status == SystemStatus.Standby)
             {
-                if(OutputFluidTemperature > 120.0)
+                if(OutputFluidTemperature > -120.0)
                 {
                     OutputFluidTemperature -= 1.75;
                 }
@@ -204,22 +204,23 @@ namespace Orbit.Models
             else
             {
                 OutputFluidTemperature = rand.Next(0, 81) / 10.0;
+				
+				// simulate a perodic pump failure
+				if (rand.Next(0, 10) == 5)
+				{
+					PumpAOn = !PumpAOn;
+				}
+				if (rand.Next(0, 10) == 9)
+				{
+					PumpBOn = !PumpBOn;
+				}
             }
 
-            // simulate a perodic pump failure
-            if (rand.Next(0, 10) == 5)
-            {
-                PumpAOn = !PumpAOn;
-            }
-            if (rand.Next(0, 10) == 9)
-            {
-                PumpBOn = !PumpBOn;
-            }
         }
 
         private void IncreaseFluidMix()
         {
-            // need formula: if valve opened 1 'degree', how much would temp change, use difference
+            // need better formula: if valve opened 1 'degree', how much would temp change, use difference
             // in outflow and set temp to determine amount to change valve
 
             if (LineHeaterOn)
@@ -244,7 +245,6 @@ namespace Orbit.Models
         {
             // Sould we use a formula? ex: if valve closed 1 'degree', how much would temp change, 
             // then use that change in outflow and set temp to determine amount to change valve
-
             if (MixValvePosition == mixValveLowerLimit)
             {
                 // heat load from station is too low to keep fluid above min temp, turn heater on
@@ -300,7 +300,13 @@ namespace Orbit.Models
 
         public void ToggleRadiatorDeployed()
         {
-            RadiatorDeployed = !RadiatorDeployed;
+            if(RadiatorDeployed){
+				RadiatorDeployed = false;
+				RadiatorRotation = 0;
+			}
+			else{
+				RadiatorDeployed = true;
+			}
         }
 
         #endregion Methods

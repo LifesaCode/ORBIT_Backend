@@ -275,24 +275,24 @@ namespace Orbit.Models
             {
                 TempLowLoop = rand.Next(0, 150) / 10.0;
                 TempMedLoop = rand.Next(0, 350) / 10.0;
-            }
-
-            if (rand.Next(0, 10) == 5)
-            {
-                LowTempPumpOn = false;
-            }
-            else
-            {
-                LowTempPumpOn = true;
-            }
-
-            if (rand.Next(0, 10) == 9)
-            {
-                MedTempPumpOn = false;
-            }
-            else
-            {
-                MedTempPumpOn = true;
+				
+				if (rand.Next(0, 10) == 5)
+				{
+					LowTempPumpOn = false;
+				}
+				else
+				{
+					LowTempPumpOn = true;
+				}
+	
+				if (rand.Next(0, 10) == 9)
+				{
+					MedTempPumpOn = false;
+				}
+				else
+				{
+					MedTempPumpOn = true;
+				}
             }
         }
 
